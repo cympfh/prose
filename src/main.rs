@@ -9,6 +9,9 @@ fn read() -> String {
     let stdin = io::stdin();
     let mut handle = stdin.lock();
     handle.read_to_string(&mut content).unwrap();
+    if !content.ends_with('\n') {
+        content += "\n"
+    }
     content
 }
 
