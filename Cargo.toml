@@ -1,12 +1,16 @@
 [package]
-name = "markdown-to-html"
-version = "0.1.2"
-authors = ["HG King <hgmaxwellking@gmail.com>"]
+name = "prose"
+version = "0.0.1"
+authors = [
+    "HG King <hgmaxwellking@gmail.com>",
+    "cympfh <cympfh@gmail.com>",
+]
 description = "Markdown parser that runs at hyper speeds!"
 license = "MIT/Apache-2.0"
-repository = "https://github.com/HGHimself/prose"
-edition = "2018"
+repository = "https://github.com/cympfh/prose"
+edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-nom = "7.0.0"
+nom = "7"
+structopt = "0.3"

@@ -1,6 +1,3 @@
-pub mod parser;
-pub mod translator;
-
 pub type MarkdownText = Vec<MarkdownInline>;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -9,7 +6,7 @@ pub enum Markdown {
     OrderedList(Vec<MarkdownText>),
     UnorderedList(Vec<MarkdownText>),
     Line(MarkdownText),
-    Codeblock(String),
+    Codeblock(String, String),
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -20,11 +17,4 @@ pub enum MarkdownInline {
     Bold(String),
     Italic(String),
     Plaintext(String),
-}
-
-pub fn markdown(md: &str) -> String {
-    match parser::parse_markdown(md) {
-        Ok((_, m)) => translator::translate(m),
-        Err(_) => String::from("Sorry, this did not seem to work! Maybe your markdown was not well formed, have you hit [Enter] after your last line?"),
-    }
 }

@@ -1,6 +1,6 @@
-use crate::Markdown;
-use crate::MarkdownInline;
-use crate::MarkdownText;
+use crate::entity::Markdown;
+use crate::entity::MarkdownInline;
+use crate::entity::MarkdownText;
 
 pub fn translate(md: Vec<Markdown>) -> String {
     md.iter()
@@ -8,7 +8,9 @@ pub fn translate(md: Vec<Markdown>) -> String {
             Markdown::Heading(size, line) => translate_header(*size, line.to_vec()),
             Markdown::UnorderedList(lines) => translate_unordered_list(lines.to_vec()),
             Markdown::OrderedList(lines) => translate_ordered_list(lines.to_vec()),
-            Markdown::Codeblock(code) => translate_codeblock(code.to_string()),
+            Markdown::Codeblock(lang, code) => {
+                translate_codeblock(lang.to_string(), code.to_string())
+            }
             Markdown::Line(line) => translate_line(line.to_vec()),
         })
         .collect::<Vec<String>>()
@@ -55,12 +57,12 @@ fn translate_ordered_list(lines: Vec<MarkdownText>) -> String {
     format!("<ol>{}</ol>", translate_list_elements(lines.to_vec()))
 }
 
-fn translate_code(code: MarkdownText) -> String {
-    format!("<code>{}</code>", translate_text(code))
-}
-
-fn translate_codeblock(code: String) -> String {
-    format!("<pre><code>{}</code></pre>", code)
+fn translate_codeblock(lang: String, code: String) -> String {
+    if lang.is_empty() {
+        format!("<pre><code>{}</code></pre>", code)
+    } else {
+        format!("<pre><code class=\"{}\">{}</code></pre>", lang, code)
+    }
 }
 
 fn translate_line(text: MarkdownText) -> String {
@@ -201,9 +203,13 @@ mod tests {
     #[test]
     fn test_translate_codeblock() {
         assert_eq!(
-			translate_codeblock(String::from("python\nimport foobar\n\nfoobar.pluralize(\'word\') # returns \'words\'\nfoobar.pluralize(\'goose\') # returns \'geese\'\nfoobar.singularize(\'phenomena\') # returns \'phenomenon\'\n")),
-			String::from("<pre><code>python\nimport foobar\n\nfoobar.pluralize(\'word\') # returns \'words\'\nfoobar.pluralize(\'goose\') # returns \'geese\'\nfoobar.singularize(\'phenomena\') # returns \'phenomenon\'\n</code></pre>")
-		);
+            translate_codeblock(String::new(), String::from("import signal")),
+            String::from("<pre><code>import signal</code></pre>")
+        );
+        assert_eq!(
+            translate_codeblock(String::from("python"), String::from("import signal")),
+            String::from("<pre><code class=\"python\">import signal</code></pre>")
+        );
     }
 
     #[test]
