@@ -58,13 +58,32 @@ fn parse_image(i: &str) -> IResult<&str, (&str, &str)> {
 // we repeat this until we run into one of our special characters
 // then we join our array of characters into a String
 fn parse_plaintext(i: &str) -> IResult<&str, String> {
-    map(
-        many1(preceded(
-            not(alt((tag("*"), tag("`"), tag("["), tag("!["), tag("\n")))),
-            take(1u8),
+    let safe_one_char = preceded(
+        not(alt((
+            tag("*"),
+            tag("`"),
+            tag("~"),
+            tag("["),
+            tag("!["),
+            tag("\\"),
+            tag("\n"),
+            tag("\r"),
+        ))),
+        take(1u8),
+    );
+    let escaped_char = map(
+        alt((
+            tag("\\*"),
+            tag("\\`"),
+            tag("\\["),
+            tag("\\]"),
+            tag("\\~"),
+            tag("\\!"),
         )),
-        |vec| vec.join(""),
-    )(i)
+        |e: &str| &e[1..2],
+    );
+
+    map(many1(alt((safe_one_char, escaped_char))), |v| v.join(""))(i)
 }
 
 fn parse_markdown_inline(i: &str) -> IResult<&str, MarkdownInline> {
@@ -254,19 +273,19 @@ mod tests {
         );
         assert_eq!(
             parse_plaintext("*bold babey bold*"),
-            err!("*bold babey bold*", ErrorKind::Not)
+            err!("*bold babey bold*", ErrorKind::Tag)
         );
         assert_eq!(
             parse_plaintext("[link babey](and then somewhat)"),
-            err!("[link babey](and then somewhat)", ErrorKind::Not)
+            err!("[link babey](and then somewhat)", ErrorKind::Tag)
         );
         assert_eq!(
             parse_plaintext("`codeblock for bums`"),
-            err!("`codeblock for bums`", ErrorKind::Not)
+            err!("`codeblock for bums`", ErrorKind::Tag)
         );
         assert_eq!(
             parse_plaintext("![ but wait theres more](jk)"),
-            err!("![ but wait theres more](jk)", ErrorKind::Not)
+            err!("![ but wait theres more](jk)", ErrorKind::Tag)
         );
         assert_eq!(
             parse_plaintext("here is plaintext"),
@@ -286,25 +305,26 @@ mod tests {
         );
         assert_eq!(
             parse_plaintext("*here is italic*"),
-            err!("*here is italic*", ErrorKind::Not)
+            err!("*here is italic*", ErrorKind::Tag)
         );
         assert_eq!(
             parse_plaintext("**here is bold**"),
-            err!("**here is bold**", ErrorKind::Not)
+            err!("**here is bold**", ErrorKind::Tag)
         );
         assert_eq!(
             parse_plaintext("`here is code`"),
-            err!("`here is code`", ErrorKind::Not)
+            err!("`here is code`", ErrorKind::Tag)
         );
         assert_eq!(
             parse_plaintext("[title](https://www.example.com)"),
-            err!("[title](https://www.example.com)", ErrorKind::Not)
+            err!("[title](https://www.example.com)", ErrorKind::Tag)
         );
         assert_eq!(
             parse_plaintext("![alt text](image.jpg)"),
-            err!("![alt text](image.jpg)", ErrorKind::Not)
+            err!("![alt text](image.jpg)", ErrorKind::Tag)
         );
-        assert_eq!(parse_plaintext(""), err!("", ErrorKind::Eof));
+        assert_eq!(parse_plaintext(""), err!("", ErrorKind::Tag));
+        assert_eq!(parse_plaintext("\\*\\[\\]"), Ok(("", String::from("*[]"))));
     }
 
     #[test]
@@ -359,8 +379,8 @@ mod tests {
                 MarkdownInline::Plaintext(String::from("here is some plaintext "))
             ))
         );
-        assert_eq!(parse_markdown_inline("\n"), err!("\n", ErrorKind::Not));
-        assert_eq!(parse_markdown_inline(""), err!("", ErrorKind::Eof));
+        assert_eq!(parse_markdown_inline("\n"), err!("\n", ErrorKind::Tag));
+        assert_eq!(parse_markdown_inline(""), err!("", ErrorKind::Tag));
     }
 
     #[test]
