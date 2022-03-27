@@ -6,10 +6,10 @@ $ cat document.md | prose > output.html
 
 ## TODO
 
-- Escaped Characters
+- [x] Escaped Characters
     - `\*` etc
-- Table
-- Flavoured Syntax
+- [ ] Table
+- [ ] Flavoured Syntax
 
 ---
 
