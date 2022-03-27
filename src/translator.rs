@@ -25,6 +25,10 @@ fn translate_italic(italic: String) -> String {
     format!("<i>{}</i>", italic)
 }
 
+fn translate_strike(italic: String) -> String {
+    format!("<s>{}</s>", italic)
+}
+
 fn translate_inline_code(code: String) -> String {
     format!("<code>{}</code>", code)
 }
@@ -79,6 +83,7 @@ fn translate_text(text: MarkdownText) -> String {
         .map(|part| match part {
             MarkdownInline::Bold(text) => translate_boldtext(text.to_string()),
             MarkdownInline::Italic(text) => translate_italic(text.to_string()),
+            MarkdownInline::Strike(text) => translate_strike(text.to_string()),
             MarkdownInline::InlineCode(code) => translate_inline_code(code.to_string()),
             MarkdownInline::Link(text, url) => translate_link(text.to_string(), url.to_string()),
             MarkdownInline::Image(text, url) => translate_image(text.to_string(), url.to_string()),
@@ -105,6 +110,14 @@ mod tests {
         assert_eq!(
             translate_italic(String::from("italic af")),
             String::from("<i>italic af</i>")
+        );
+    }
+
+    #[test]
+    fn test_translate_strike() {
+        assert_eq!(
+            translate_strike(String::from("hoge")),
+            String::from("<s>hoge</s>")
         );
     }
 

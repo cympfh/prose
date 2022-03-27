@@ -16,5 +16,6 @@ pub enum MarkdownInline {
     InlineCode(String),
     Bold(String),
     Italic(String),
+    Strike(String),
     Plaintext(String),
 }

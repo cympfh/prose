@@ -34,6 +34,10 @@ fn parse_italics(i: &str) -> IResult<&str, &str> {
     delimited(tag("*"), is_not("*"), tag("*"))(i)
 }
 
+fn parse_strike(i: &str) -> IResult<&str, &str> {
+    delimited(tag("~"), is_not("~"), tag("~"))(i)
+}
+
 fn parse_inline_code(i: &str) -> IResult<&str, &str> {
     delimited(tag("`"), is_not("`"), tag("`"))(i)
 }
@@ -90,6 +94,9 @@ fn parse_markdown_inline(i: &str) -> IResult<&str, MarkdownInline> {
     alt((
         map(parse_italics, |s: &str| {
             MarkdownInline::Italic(s.to_string())
+        }),
+        map(parse_strike, |s: &str| {
+            MarkdownInline::Strike(s.to_string())
         }),
         map(parse_inline_code, |s: &str| {
             MarkdownInline::InlineCode(s.to_string())
