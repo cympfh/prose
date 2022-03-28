@@ -16,6 +16,7 @@ use nom::{
 
 pub fn parse_markdown(i: &str) -> IResult<&str, Vec<Markdown>> {
     many1(alt((
+        map(parse_horizontal_rule, |_| Markdown::HorizontalRule),
         map(parse_header, |e| Markdown::Heading(e.0, e.1)),
         map(parse_unordered_list, |e| Markdown::UnorderedList(e)),
         map(parse_ordered_list, |e| Markdown::OrderedList(e)),
@@ -24,6 +25,10 @@ pub fn parse_markdown(i: &str) -> IResult<&str, Vec<Markdown>> {
         }),
         map(parse_markdown_text, |e| Markdown::Line(e)),
     )))(i)
+}
+
+fn parse_horizontal_rule(i: &str) -> IResult<&str, &str> {
+    preceded(tag("---"), line_ending)(i)
 }
 
 fn parse_boldtext(i: &str) -> IResult<&str, &str> {

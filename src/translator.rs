@@ -12,9 +12,14 @@ pub fn translate(md: Vec<Markdown>) -> String {
                 translate_codeblock(lang.to_string(), code.to_string())
             }
             Markdown::Line(line) => translate_line(line.to_vec()),
+            Markdown::HorizontalRule => translate_horizontal_rule(),
         })
         .collect::<Vec<String>>()
         .join("")
+}
+
+fn translate_horizontal_rule() -> String {
+    format!("<hr />")
 }
 
 fn translate_boldtext(boldtext: String) -> String {

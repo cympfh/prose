@@ -7,6 +7,7 @@ pub enum Markdown {
     UnorderedList(Vec<MarkdownText>),
     Line(MarkdownText),
     Codeblock(String, String),
+    HorizontalRule,
 }
 
 #[derive(Clone, Debug, PartialEq)]
