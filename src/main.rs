@@ -3,6 +3,7 @@ pub mod parser;
 pub mod translator;
 
 use std::io::{self, Read};
+use structopt::StructOpt;
 
 fn read() -> String {
     let mut content = String::new();
@@ -19,10 +20,22 @@ fn write(buf: &String) {
     println!("{}", buf);
 }
 
+#[derive(Debug, StructOpt)]
+struct Opt {
+    #[structopt(long = "debug")]
+    pub debug: bool,
+}
+
 fn main() {
+    let opt = Opt::from_args();
+    if opt.debug {
+        println!(">>> opt = {:?}", &opt);
+    }
     let content = read();
     if let Ok((_, markdown)) = parser::parse_markdown(content.as_str()) {
-        println!("{:?}", markdown);
+        if opt.debug {
+            println!(">>> markdown = {:?}", &markdown);
+        }
         let html = translator::translate(markdown);
         write(&html);
     } else {
