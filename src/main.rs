@@ -42,3 +42,34 @@ fn main() {
         eprintln!("Something critical error");
     }
 }
+
+#[cfg(test)]
+mod test_main {
+
+    use crate::parser;
+    use crate::translator;
+
+    macro_rules! assert_convert {
+        ($markdown:expr, $html:expr) => {
+            assert_eq!(
+                translator::translate(parser::parse_markdown($markdown).unwrap().1),
+                String::from($html)
+            );
+        };
+    }
+
+    #[test]
+    fn test_convert() {
+        assert_convert!("# h1\n", "<h1>h1</h1>");
+        assert_convert!("## h2\n", "<h2>h2</h2>");
+        assert_convert!("- a\n- b\n- c\n", "<ul><li>a</li><li>b</li><li>c</li></ul>");
+    }
+
+    #[test]
+    fn test_examples_full() {
+        use std::fs::read_to_string;
+        let content = read_to_string("./examples/full.md").unwrap();
+        let expected = read_to_string("./examples/full.html").unwrap();
+        assert_convert!(content.as_str(), expected.as_str());
+    }
+}
